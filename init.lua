@@ -1,4 +1,4 @@
-function modifyOptions(table)
+local function modifyOptions(table)
 	return function(dictionary)
 		for k, v in pairs(dictionary) do
 			table[k] = v
@@ -44,6 +44,11 @@ bind("n", "<leader>e", vim.diagnostic.open_float, { desc = "Show [D]iagnostics e
 bind("n", "<leader>q", vim.diagnostic.setloclist, { desc = "Open [D]iagnostics quickfix list" })
 
 bind("n", "<leader>s", "<cmd>w<cr>", { desc = "[S]aves the current buffer" })
+
+bind("n", "<C-h>", "<C-w><C-h>", { desc = "Switch [W]indow left" })
+bind("n", "<C-j>", "<C-w><C-j>", { desc = "Switch [W]indow up" })
+bind("n", "<C-k>", "<C-w><C-k>", { desc = "Switch [W]indow down" })
+bind("n", "<C-l>", "<C-w><C-l>", { desc = "Switch [W]indow right" })
 
 DisableKeysDict = {
 	{ key = "<left>", alt = "h" },
@@ -648,6 +653,7 @@ require("lazy").setup({
 				--    Don't feel like these are good choices.
 				icons = { expanded = "▾", collapsed = "▸", current_frame = "*" },
 				controls = {
+					enabled = true,
 					icons = {
 						pause = "⏸",
 						play = "▶",
@@ -671,6 +677,76 @@ require("lazy").setup({
 
 			-- Install golang specific config
 			require("dap-go").setup()
+		end,
+	},
+	{
+		"karb94/neoscroll.nvim",
+		opts = {},
+	},
+	{
+		"mbbill/undotree",
+		config = function()
+			bind("n", "<leader>u", vim.cmd.UndotreeToggle, { desc = "[T]oggle undo tree" })
+		end,
+	},
+	{
+		"ThePrimeagen/harpoon",
+		branch = "harpoon2",
+		dependencies = {
+			"nvim-telescope/telescope.nvim",
+		},
+		config = function()
+			local ok, h = pcall(require, "harpoon")
+			if not ok then
+				print("Couldnt load harpoon")
+				return
+			end
+
+			h.setup({})
+
+			local okt, tc = pcall(require, "telescope.config")
+			if not okt then
+				print("Harpoon loaded, couldn't fetch telescope config")
+				return
+			end
+
+			local v = tc.values
+
+			local function toggle_telescope(harpoonfiles)
+				local file_paths = {}
+				for _, item in ipairs(harpoonfiles.items) do
+					table.insert(file_paths, item.value)
+				end
+
+				local oktp, tp = pcall(require, "telescope.pickers")
+				if not oktp then
+					print("toggle_telescope, couldn't load telescope pickers")
+					return
+				end
+
+				tp.new({}, {
+					prompt_title = "Harpoon",
+					finder = require("telescope.finders").new_table({
+						results = file_paths,
+					}),
+					previewer = v.file_previewer({}),
+					sorter = v.generic_sorter({}),
+				}):find()
+			end
+
+			bind("n", "<C-e>", function()
+				toggle_telescope(h:list())
+			end, { desc = "[O]pen harpoon picker" })
+		end,
+	},
+	{
+		"folke/zen-mode.nvim",
+		config = function()
+			require("zen-mode").setup({
+				window = { options = { list = false } },
+				plugins = { kitty = { enabled = true, font = "+4" }, tmux = { enabled = true } },
+			})
+			bind("n", "<leader>z", "<cmd>ZenMode<cr>", { desc = "Toggle [Z]en-mode" })
 		end,
 	},
 })

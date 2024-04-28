@@ -525,6 +525,7 @@ require("lazy").setup({
 					--    https://github.com/L3MON4D3/LuaSnip?tab=readme-ov-file#keymaps
 				}),
 				sources = {
+					{ name = "copilot" },
 					{ name = "nvim_lsp" },
 					{ name = "luasnip" },
 					{ name = "path" },
@@ -549,6 +550,9 @@ require("lazy").setup({
 			-- - sd'   - [S]urround [D]elete [']quotes
 			-- - sr)'  - [S]urround [R]eplace [)] [']
 			require("mini.surround").setup()
+
+			require("mini.starter").setup()
+			require("mini.pairs").setup()
 		end,
 	},
 	{ -- Highlight, edit, and navigate code
@@ -743,10 +747,44 @@ require("lazy").setup({
 		"folke/zen-mode.nvim",
 		config = function()
 			require("zen-mode").setup({
-				window = { options = { list = false } },
+				window = { options = { list = false }, width = 0.7 },
 				plugins = { kitty = { enabled = true, font = "+4" }, tmux = { enabled = true } },
 			})
 			bind("n", "<leader>z", "<cmd>ZenMode<cr>", { desc = "Toggle [Z]en-mode" })
 		end,
+	},
+	{
+		"stevearc/dressing.nvim",
+		opts = {},
+	},
+	{
+		"rcarriga/nvim-notify",
+		opts = {},
+		priority = 1000,
+		init = function()
+			vim.notify = require("notify")
+		end,
+	},
+	{
+		"zbirenbaum/copilot.lua",
+		cmd = "Copilot",
+		event = "InsertEnter",
+		config = function()
+			require("copilot").setup({
+				suggestion = { enabled = false },
+				panel = { enabled = false },
+			})
+
+			bind("n", "<leader>0", "<cmd>Copilot toggle<cr>", { desc = "[C]opilot Toggle" })
+		end,
+	},
+	{
+		"zbirenbaum/copilot-cmp",
+		config = function()
+			require("copilot_cmp").setup()
+		end,
+	},
+	{
+		"MunifTanjim/nui.nvim",
 	},
 })
